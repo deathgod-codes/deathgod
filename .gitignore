@@ -1,0 +1,58 @@
+# Environment variables
+.env
+
+# Database backups
+*.sql.gz
+*.sql.backup
+
+# User uploaded files (optional - uncomment if you want to exclude uploads)
+# php/images/*
+# !php/images/.gitkeep
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+error_log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (if using Node.js for WebSocket)
+node_modules/
+package-lock.json
+
+# Composer dependencies
+vendor/
+composer.lock
+
+# Build files
+dist/
+build/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Session files
+sessions/
+
+# Cache
+cache/
+*.cache
+
+# ZIP files
+*.zip
+
+# Backup files
+backup/
+*.bak

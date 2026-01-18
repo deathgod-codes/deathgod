@@ -1,14 +1,30 @@
 <?php
     session_start();
     include_once "config.php";
+    include_once "Security.php";
+    
+    $security = new Security($conn);
+    
+    // Validate session
+    if (!$security->validateSession()) {
+        echo "Session expired";
+        exit();
+    }
+    
     $outgoing_id = $_SESSION['unique_id'];
-    $sql = "SELECT * FROM users WHERE NOT unique_id = {$outgoing_id} ORDER BY user_id DESC";
-    $query = mysqli_query($conn, $sql);
+    
+    // Use prepared statement
+    $stmt = $conn->prepare("SELECT * FROM users WHERE NOT unique_id = ? ORDER BY user_id DESC");
+    $stmt->bind_param("i", $outgoing_id);
+    $stmt->execute();
+    $query = $stmt->get_result();
+    
     $output = "";
-    if(mysqli_num_rows($query) == 0){
+    if($query->num_rows == 0){
         $output .= "No users are available to chat";
-    }elseif(mysqli_num_rows($query) > 0){
+    }elseif($query->num_rows > 0){
         include_once "data.php";
     }
+    $stmt->close();
     echo $output;
 ?>
