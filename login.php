@@ -3,6 +3,11 @@
   if(isset($_SESSION['unique_id'])){
     header("location: users.php");
   }
+  
+  // Generate CSRF token
+  if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+  }
 ?>
 
 <?php include_once "header.php"; ?>
@@ -12,6 +17,7 @@
       <header>Realtime Chat App</header>
       <form action="#" method="POST" enctype="multipart/form-data" autocomplete="off">
         <div class="error-text"></div>
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <div class="field input">
           <label>Email Address</label>
           <input type="text" name="email" placeholder="Enter your email" required>
