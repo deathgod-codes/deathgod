@@ -12,10 +12,13 @@ fetch('php/get-session-user.php')
         currentUserId = data.unique_id;
         // Initialize WebSocket
         initWebSocket();
+        // Initialize file upload
+        initFileUpload();
     });
 
 let wsClient = null;
 let typingTimeout = null;
+let fileUploadHandler = null;
 
 form.onsubmit = (e)=>{
     e.preventDefault();
@@ -191,4 +194,141 @@ function escapeHtml(text) {
 function scrollToBottom(){
     chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+function initFileUpload() {
+    fileUploadHandler = new FileUploadHandler({
+        conversationWith: parseInt(incoming_id),
+        onUploadStart: (fileName) => {
+            showUploadProgress(fileName, 0);
+        },
+        onUploadProgress: (percent, fileName) => {
+            updateUploadProgress(fileName, percent);
+        },
+        onUploadComplete: (response, file) => {
+            hideUploadProgress();
+            // Display uploaded file in chat
+            displayFileMessage(response);
+            // Send via WebSocket to notify recipient
+            if (wsClient) {
+                wsClient.send('file_uploaded', {
+                    incoming_id: parseInt(incoming_id),
+                    file_data: response
+                });
+            }
+        },
+        onUploadError: (error) => {
+            hideUploadProgress();
+            alert('Upload error: ' + error);
+        }
+    });
+}
+
+function showUploadProgress(fileName, percent) {
+    let progressDiv = document.querySelector('.upload-progress');
+    if (!progressDiv) {
+        progressDiv = document.createElement('div');
+        progressDiv.className = 'upload-progress';
+        progressDiv.innerHTML = `
+            <h4>Uploading: <span class="file-name">${fileName}</span></h4>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: ${percent}%"></div>
+            </div>
+        `;
+        document.body.appendChild(progressDiv);
+    }
+}
+
+function updateUploadProgress(fileName, percent) {
+    const progressDiv = document.querySelector('.upload-progress');
+    if (progressDiv) {
+        progressDiv.querySelector('.file-name').textContent = fileName;
+        progressDiv.querySelector('.progress-bar-fill').style.width = percent + '%';
+    }
+}
+
+function hideUploadProgress() {
+    const progressDiv = document.querySelector('.upload-progress');
+    if (progressDiv) {
+        setTimeout(() => progressDiv.remove(), 1000);
+    }
+}
+
+function displayFileMessage(fileData) {
+    let fileHtml = '';
+    
+    if (fileData.file_type === 'image') {
+        fileHtml = `
+            <div class="file-attachment">
+                <img src="${fileData.file_url}" alt="Uploaded image" 
+                     onclick="openImageLightbox('${fileData.file_url}')">
+            </div>
+        `;
+    } else if (fileData.file_type === 'video') {
+        fileHtml = `
+            <div class="file-attachment">
+                <video controls>
+                    <source src="${fileData.file_url}" type="video/mp4">
+                </video>
+            </div>
+        `;
+    } else if (fileData.file_type === 'audio') {
+        fileHtml = `
+            <div class="file-attachment">
+                <audio controls>
+                    <source src="${fileData.file_url}">
+                </audio>
+            </div>
+        `;
+    } else {
+        fileHtml = `
+            <a href="api/v1/files/download.php?file=${encodeURIComponent(fileData.file_url)}" 
+               class="file-document" target="_blank">
+                <span class="file-icon">📄</span>
+                <div class="file-info">
+                    <div class="name">${fileData.original_name}</div>
+                    <div class="size">${formatFileSize(fileData.file_size)}</div>
+                </div>
+            </a>
+        `;
+    }
+    
+    const messageHtml = `
+        <div class="chat outgoing">
+            <div class="details">
+                ${fileHtml}
+            </div>
+        </div>
+    `;
+    
+    chatBox.insertAdjacentHTML('beforeend', messageHtml);
+    scrollToBottom();
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+function openImageLightbox(imageUrl) {
+    const lightbox = document.createElement('div');
+    lightbox.className = 'image-lightbox';
+    lightbox.innerHTML = `
+        <div class="lightbox-content">
+            <button class="close-lightbox">&times;</button>
+            <img src="${imageUrl}" alt="Full size image">
+        </div>
+    `;
+    
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox || e.target.className === 'close-lightbox') {
+            lightbox.remove();
+        }
+    });
+    
+    document.body.appendChild(lightbox);
+}
+
   

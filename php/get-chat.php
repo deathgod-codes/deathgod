@@ -11,17 +11,53 @@
         $query = mysqli_query($conn, $sql);
         if(mysqli_num_rows($query) > 0){
             while($row = mysqli_fetch_assoc($query)){
+                $messageContent = '';
+                
+                // Check if message has file attachment
+                if (!empty($row['file_url'])) {
+                    $fileUrl = htmlspecialchars($row['file_url']);
+                    $fileType = $row['file_type'];
+                    
+                    if ($fileType === 'image') {
+                        $messageContent = '<div class="file-attachment">
+                            <img src="'.$fileUrl.'" alt="Image" onclick="openImageLightbox(\''.$fileUrl.'\')">
+                        </div>';
+                    } elseif ($fileType === 'video') {
+                        $messageContent = '<div class="file-attachment">
+                            <video controls><source src="'.$fileUrl.'" type="video/mp4"></video>
+                        </div>';
+                    } elseif ($fileType === 'audio') {
+                        $messageContent = '<div class="file-attachment">
+                            <audio controls><source src="'.$fileUrl.'"></audio>
+                        </div>';
+                    } else {
+                        $fileName = basename($fileUrl);
+                        $fileSize = !empty($row['file_size']) ? $row['file_size'] : 0;
+                        $fileSizeStr = formatFileSize($fileSize);
+                        $messageContent = '<a href="api/v1/files/download.php?file='.urlencode($fileUrl).'" class="file-document" target="_blank">
+                            <span class="file-icon">📄</span>
+                            <div class="file-info">
+                                <div class="name">'.$fileName.'</div>
+                                <div class="size">'.$fileSizeStr.'</div>
+                            </div>
+                        </a>';
+                    }
+                } else {
+                    // Regular text message
+                    $messageContent = '<p>'. htmlspecialchars($row['msg']) .'</p>';
+                }
+                
                 if($row['outgoing_msg_id'] === $outgoing_id){
                     $output .= '<div class="chat outgoing">
                                 <div class="details">
-                                    <p>'. $row['msg'] .'</p>
+                                    '. $messageContent .'
                                 </div>
                                 </div>';
                 }else{
                     $output .= '<div class="chat incoming">
                                 <img src="php/images/'.$row['img'].'" alt="">
                                 <div class="details">
-                                    <p>'. $row['msg'] .'</p>
+                                    '. $messageContent .'
                                 </div>
                                 </div>';
                 }
@@ -32,6 +68,14 @@
         echo $output;
     }else{
         header("location: ../login.php");
+    }
+    
+    function formatFileSize($bytes) {
+        if ($bytes == 0) return '0 Bytes';
+        $k = 1024;
+        $sizes = array('Bytes', 'KB', 'MB', 'GB');
+        $i = floor(log($bytes) / log($k));
+        return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
     }
 
 ?>
