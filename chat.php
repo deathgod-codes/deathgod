@@ -25,6 +25,7 @@
           <span><?php echo $row['fname']. " " . $row['lname'] ?></span>
           <p><?php echo $row['status']; ?></p>
         </div>
+        <div class="connection-status connecting">Connecting...</div>
       </header>
       <div class="chat-box">
 
@@ -37,6 +38,7 @@
     </section>
   </div>
 
+  <script src="javascript/websocket-client.js"></script>
   <script src="javascript/chat.js"></script>
 
 </body>
