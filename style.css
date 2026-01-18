@@ -156,6 +156,29 @@ body{
   border-radius: 5px;
   font-size: 17px;
 }
+
+.users header .theme-toggle {
+  padding: 7px 12px;
+  margin: 0 10px;
+  font-size: 14px;
+}
+
+.users header .theme-toggle .theme-text {
+  display: none;
+}
+
+.chat-area header .theme-toggle {
+  padding: 6px;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  justify-content: center;
+}
+
+.chat-area header .theme-toggle .theme-text {
+  display: none;
+}
+
 .users .search{
   margin: 20px 0;
   display: flex;

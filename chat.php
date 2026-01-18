@@ -25,6 +25,9 @@
           <span><?php echo $row['fname']. " " . $row['lname'] ?></span>
           <p><?php echo $row['status']; ?></p>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="margin-left: auto; margin-right: 10px;">
+          <i class="fas fa-moon"></i>
+        </button>
         <div class="connection-status connecting">Connecting...</div>
       </header>
       <div class="chat-box">

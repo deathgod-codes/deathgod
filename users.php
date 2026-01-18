@@ -23,6 +23,10 @@
             <p><?php echo $row['status']; ?></p>
           </div>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+          <i class="fas fa-moon"></i>
+          <span class="theme-text">Dark</span>
+        </button>
         <a href="php/logout.php?logout_id=<?php echo $row['unique_id']; ?>" class="logout">Logout</a>
       </header>
       <div class="search">
