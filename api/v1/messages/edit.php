@@ -53,15 +53,15 @@ if($result->num_rows === 0){
 $stmt->close();
 
 // Update the message
-$sanitized_message = htmlspecialchars($new_message, ENT_QUOTES, 'UTF-8');
 $update_stmt = $conn->prepare("UPDATE messages SET msg = ?, is_edited = 1, updated_at = NOW() WHERE msg_id = ?");
-$update_stmt->bind_param("si", $sanitized_message, $msg_id);
+$update_stmt->bind_param("si", $new_message, $msg_id);
 
 if($update_stmt->execute()){
+    // Sanitize for output only
     echo json_encode([
         'success' => true, 
         'message' => 'Message updated successfully',
-        'updated_message' => $sanitized_message
+        'updated_message' => htmlspecialchars($new_message, ENT_QUOTES, 'UTF-8')
     ]);
 }else{
     echo json_encode(['success' => false, 'error' => 'Failed to update message']);

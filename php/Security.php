@@ -79,15 +79,15 @@ class Security {
             }
             
             // Check failed attempts
-            if ($row['failed_login_attempts'] >= 5) {
-                // Lock account for 15 minutes
-                $lockUntil = date('Y-m-d H:i:s', time() + 900);
+            if ($row['failed_login_attempts'] >= self::MAX_LOGIN_ATTEMPTS) {
+                // Lock account
+                $lockUntil = date('Y-m-d H:i:s', time() + self::ACCOUNT_LOCK_DURATION);
                 $updateStmt = $this->conn->prepare("UPDATE users SET account_locked_until = ? WHERE email = ?");
                 $updateStmt->bind_param("ss", $lockUntil, $email);
                 $updateStmt->execute();
                 $updateStmt->close();
                 $stmt->close();
-                return "Too many failed attempts. Account locked for 15 minutes.";
+                return "Too many failed attempts. Account locked for " . (self::ACCOUNT_LOCK_DURATION / 60) . " minutes.";
             }
         }
         
@@ -123,15 +123,22 @@ class Security {
         header("X-Content-Type-Options: nosniff");
         header("X-XSS-Protection: 1; mode=block");
         header("Referrer-Policy: strict-origin-when-cross-origin");
+        // Note: unsafe-inline is used for compatibility. In production, consider using nonces or hashes
+        // for inline scripts and styles, or move all JS/CSS to external files
         header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://kit.fontawesome.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com https://ka-f.fontawesome.com;");
     }
+    
+    // Configuration constants
+    const SESSION_TIMEOUT = 1800; // 30 minutes in seconds
+    const MAX_LOGIN_ATTEMPTS = 5;
+    const ACCOUNT_LOCK_DURATION = 900; // 15 minutes in seconds
     
     /**
      * Validate session and check for timeout
      */
     public function validateSession() {
-        // Session timeout after 30 minutes of inactivity
-        if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
+        // Session timeout
+        if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > self::SESSION_TIMEOUT)) {
             session_unset();
             session_destroy();
             return false;

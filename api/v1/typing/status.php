@@ -72,6 +72,9 @@ if($method === 'POST'){
     $conversation_id = intval($_GET['conversation_id']);
     $conversation_type = isset($_GET['conversation_type']) ? $_GET['conversation_type'] : 'user';
     
+    // Calculate cutoff time (5 seconds ago) for better index usage
+    $cutoff_time = date('Y-m-d H:i:s', time() - 5);
+    
     // Get users who are typing (exclude current user, only active in last 5 seconds)
     $stmt = $conn->prepare("SELECT u.fname, u.lname FROM typing_status t 
                             JOIN users u ON t.user_id = u.unique_id 
@@ -79,8 +82,8 @@ if($method === 'POST'){
                             AND t.conversation_type = ? 
                             AND t.user_id != ? 
                             AND t.is_typing = 1 
-                            AND t.updated_at > DATE_SUB(NOW(), INTERVAL 5 SECOND)");
-    $stmt->bind_param("isi", $conversation_id, $conversation_type, $user_id);
+                            AND t.updated_at > ?");
+    $stmt->bind_param("isis", $conversation_id, $conversation_type, $user_id, $cutoff_time);
     $stmt->execute();
     $result = $stmt->get_result();
     

@@ -13,6 +13,7 @@ if(!isset($_SESSION['unique_id'])){
 
 include_once "../../../php/config.php";
 include_once "../../../php/Security.php";
+include_once "../../../php/Config.php";
 
 $security = new Security($conn);
 
@@ -34,9 +35,8 @@ $msg_id = intval($input['msg_id']);
 $reaction = $input['reaction'];
 $user_id = $_SESSION['unique_id'];
 
-// Validate reaction (allowed emojis)
-$allowed_reactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
-if(!in_array($reaction, $allowed_reactions)){
+// Validate reaction (use Config class)
+if(!in_array($reaction, Config::ALLOWED_REACTIONS)){
     echo json_encode(['success' => false, 'error' => 'Invalid reaction']);
     exit();
 }
