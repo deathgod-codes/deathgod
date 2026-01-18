@@ -19,12 +19,44 @@ fetch('php/get-session-user.php')
 let wsClient = null;
 let typingTimeout = null;
 let fileUploadHandler = null;
+let emojiPicker = null;
 
 form.onsubmit = (e)=>{
     e.preventDefault();
 }
 
 inputField.focus();
+
+// Initialize emoji picker
+function initEmojiPicker() {
+    emojiPicker = new EmojiPicker({
+        onEmojiSelect: (emoji) => {
+            // Insert emoji at cursor position
+            const cursorPos = inputField.selectionStart;
+            const textBefore = inputField.value.substring(0, cursorPos);
+            const textAfter = inputField.value.substring(cursorPos);
+            inputField.value = textBefore + emoji + textAfter;
+            
+            // Move cursor after emoji
+            const newCursorPos = cursorPos + emoji.length;
+            inputField.setSelectionRange(newCursorPos, newCursorPos);
+            inputField.focus();
+            
+            // Trigger active state for send button
+            if(inputField.value != ""){
+                sendBtn.classList.add("active");
+            }
+        }
+    });
+}
+
+function toggleEmojiPicker() {
+    if (!emojiPicker) {
+        initEmojiPicker();
+    }
+    emojiPicker.toggle(inputField);
+}
+
 
 // Typing indicator
 inputField.onkeyup = ()=>{
@@ -139,16 +171,17 @@ function loadMessages() {
 
 function appendMessage(data) {
     const isOutgoing = data.outgoing_msg_id == currentUserId;
+    const formattedMessage = formatMessageText(data.message);
     const messageHtml = isOutgoing ? 
         `<div class="chat outgoing">
             <div class="details">
-                <p>${escapeHtml(data.message)}</p>
+                <p>${formattedMessage}</p>
             </div>
         </div>` :
         `<div class="chat incoming">
             <img src="php/images/${data.sender.img}" alt="">
             <div class="details">
-                <p>${escapeHtml(data.message)}</p>
+                <p>${formattedMessage}</p>
             </div>
         </div>`;
     
@@ -189,6 +222,32 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+function formatMessageText(text) {
+    // Escape HTML first
+    let formatted = escapeHtml(text);
+    
+    // Auto-detect and linkify URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    formatted = formatted.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    
+    // Support basic markdown
+    // Bold: **text** or __text__
+    formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/__(.+?)__/g, '<strong>$1</strong>');
+    
+    // Italic: *text* or _text_
+    formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    formatted = formatted.replace(/_(.+?)_/g, '<em>$1</em>');
+    
+    // Code: `code`
+    formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
+    
+    // Line breaks
+    formatted = formatted.replace(/\n/g, '<br>');
+    
+    return formatted;
 }
 
 function scrollToBottom(){

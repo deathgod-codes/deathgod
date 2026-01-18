@@ -43,8 +43,8 @@
                         </a>';
                     }
                 } else {
-                    // Regular text message
-                    $messageContent = '<p>'. htmlspecialchars($row['msg']) .'</p>';
+                    // Regular text message - format with markdown and links
+                    $messageContent = '<p>'. formatMessageText($row['msg']) .'</p>';
                 }
                 
                 if($row['outgoing_msg_id'] === $outgoing_id){
@@ -76,6 +76,35 @@
         $sizes = array('Bytes', 'KB', 'MB', 'GB');
         $i = floor(log($bytes) / log($k));
         return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+    }
+    
+    function formatMessageText($text) {
+        // Escape HTML first
+        $formatted = htmlspecialchars($text);
+        
+        // Auto-detect and linkify URLs
+        $formatted = preg_replace(
+            '/(https?:\/\/[^\s]+)/i',
+            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+            $formatted
+        );
+        
+        // Support basic markdown
+        // Bold: **text** or __text__
+        $formatted = preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', $formatted);
+        $formatted = preg_replace('/__(.+?)__/s', '<strong>$1</strong>', $formatted);
+        
+        // Italic: *text* or _text_
+        $formatted = preg_replace('/\*(.+?)\*/s', '<em>$1</em>', $formatted);
+        $formatted = preg_replace('/_(.+?)_/s', '<em>$1</em>', $formatted);
+        
+        // Code: `code`
+        $formatted = preg_replace('/`(.+?)`/s', '<code>$1</code>', $formatted);
+        
+        // Line breaks
+        $formatted = nl2br($formatted);
+        
+        return $formatted;
     }
 
 ?>

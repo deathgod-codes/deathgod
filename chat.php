@@ -36,6 +36,9 @@
         </button>
         <input type="text" class="incoming_id" name="incoming_id" value="<?php echo $user_id; ?>" hidden>
         <input type="text" name="message" class="input-field" placeholder="Type a message here..." autocomplete="off">
+        <button type="button" class="emoji-picker-btn" onclick="toggleEmojiPicker()" title="Insert emoji">
+          😊
+        </button>
         <button type="submit"><i class="fab fa-telegram-plane"></i></button>
       </form>
     </section>
@@ -43,6 +46,7 @@
 
   <script src="javascript/websocket-client.js"></script>
   <script src="javascript/file-upload.js"></script>
+  <script src="javascript/emoji-picker.js"></script>
   <script src="javascript/chat.js"></script>
 
 </body>
