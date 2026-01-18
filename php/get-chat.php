@@ -11,17 +11,53 @@
         $query = mysqli_query($conn, $sql);
         if(mysqli_num_rows($query) > 0){
             while($row = mysqli_fetch_assoc($query)){
+                $messageContent = '';
+                
+                // Check if message has file attachment
+                if (!empty($row['file_url'])) {
+                    $fileUrl = htmlspecialchars($row['file_url']);
+                    $fileType = $row['file_type'];
+                    
+                    if ($fileType === 'image') {
+                        $messageContent = '<div class="file-attachment">
+                            <img src="'.$fileUrl.'" alt="Image" onclick="openImageLightbox(\''.$fileUrl.'\')">
+                        </div>';
+                    } elseif ($fileType === 'video') {
+                        $messageContent = '<div class="file-attachment">
+                            <video controls><source src="'.$fileUrl.'" type="video/mp4"></video>
+                        </div>';
+                    } elseif ($fileType === 'audio') {
+                        $messageContent = '<div class="file-attachment">
+                            <audio controls><source src="'.$fileUrl.'"></audio>
+                        </div>';
+                    } else {
+                        $fileName = basename($fileUrl);
+                        $fileSize = !empty($row['file_size']) ? $row['file_size'] : 0;
+                        $fileSizeStr = formatFileSize($fileSize);
+                        $messageContent = '<a href="api/v1/files/download.php?file='.urlencode($fileUrl).'" class="file-document" target="_blank">
+                            <span class="file-icon">📄</span>
+                            <div class="file-info">
+                                <div class="name">'.$fileName.'</div>
+                                <div class="size">'.$fileSizeStr.'</div>
+                            </div>
+                        </a>';
+                    }
+                } else {
+                    // Regular text message - format with markdown and links
+                    $messageContent = '<p>'. formatMessageText($row['msg']) .'</p>';
+                }
+                
                 if($row['outgoing_msg_id'] === $outgoing_id){
                     $output .= '<div class="chat outgoing">
                                 <div class="details">
-                                    <p>'. $row['msg'] .'</p>
+                                    '. $messageContent .'
                                 </div>
                                 </div>';
                 }else{
                     $output .= '<div class="chat incoming">
                                 <img src="php/images/'.$row['img'].'" alt="">
                                 <div class="details">
-                                    <p>'. $row['msg'] .'</p>
+                                    '. $messageContent .'
                                 </div>
                                 </div>';
                 }
@@ -32,6 +68,43 @@
         echo $output;
     }else{
         header("location: ../login.php");
+    }
+    
+    function formatFileSize($bytes) {
+        if ($bytes == 0) return '0 Bytes';
+        $k = 1024;
+        $sizes = array('Bytes', 'KB', 'MB', 'GB');
+        $i = floor(log($bytes) / log($k));
+        return round($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+    }
+    
+    function formatMessageText($text) {
+        // Escape HTML first
+        $formatted = htmlspecialchars($text);
+        
+        // Auto-detect and linkify URLs
+        $formatted = preg_replace(
+            '/(https?:\/\/[^\s]+)/i',
+            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+            $formatted
+        );
+        
+        // Support basic markdown
+        // Bold: **text** or __text__
+        $formatted = preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', $formatted);
+        $formatted = preg_replace('/__(.+?)__/s', '<strong>$1</strong>', $formatted);
+        
+        // Italic: *text* or _text_
+        $formatted = preg_replace('/\*(.+?)\*/s', '<em>$1</em>', $formatted);
+        $formatted = preg_replace('/_(.+?)_/s', '<em>$1</em>', $formatted);
+        
+        // Code: `code`
+        $formatted = preg_replace('/`(.+?)`/s', '<code>$1</code>', $formatted);
+        
+        // Line breaks
+        $formatted = nl2br($formatted);
+        
+        return $formatted;
     }
 
 ?>

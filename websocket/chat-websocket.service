@@ -1,0 +1,14 @@
+[Unit]
+Description=WebSocket Chat Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/html/deathgod
+ExecStart=/usr/bin/php /var/www/html/deathgod/websocket/server.php
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

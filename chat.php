@@ -25,18 +25,31 @@
           <span><?php echo $row['fname']. " " . $row['lname'] ?></span>
           <p><?php echo $row['status']; ?></p>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="margin-left: auto; margin-right: 10px;">
+          <i class="fas fa-moon"></i>
+        </button>
+        <div class="connection-status connecting">Connecting...</div>
       </header>
       <div class="chat-box">
 
       </div>
       <form action="#" class="typing-area">
+        <button type="button" class="file-upload-btn" onclick="fileUploadHandler.openFileDialog()" title="Attach file">
+          <i class="fas fa-paperclip"></i>
+        </button>
         <input type="text" class="incoming_id" name="incoming_id" value="<?php echo $user_id; ?>" hidden>
         <input type="text" name="message" class="input-field" placeholder="Type a message here..." autocomplete="off">
-        <button><i class="fab fa-telegram-plane"></i></button>
+        <button type="button" class="emoji-picker-btn" onclick="toggleEmojiPicker()" title="Insert emoji">
+          😊
+        </button>
+        <button type="submit"><i class="fab fa-telegram-plane"></i></button>
       </form>
     </section>
   </div>
 
+  <script src="javascript/websocket-client.js"></script>
+  <script src="javascript/file-upload.js"></script>
+  <script src="javascript/emoji-picker.js"></script>
   <script src="javascript/chat.js"></script>
 
 </body>

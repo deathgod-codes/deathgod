@@ -1,0 +1,26 @@
+# Composer dependencies
+/vendor/
+composer.lock
+
+# Uploaded files (should be managed separately in production)
+/uploads/*
+!/uploads/.gitkeep
+
+# Logs
+/websocket/*.log
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
