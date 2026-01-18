@@ -1,0 +1,191 @@
+/**
+ * Dark Mode Theme
+ * CSS variables and dark theme styles
+ */
+
+:root {
+  --bg-primary: #f7f7f7;
+  --bg-secondary: #fff;
+  --text-primary: #333;
+  --text-secondary: #999;
+  --border-color: #e6e6e6;
+  --button-bg: #333;
+  --button-text: #fff;
+  --chat-incoming-bg: #f2f2f2;
+  --chat-outgoing-bg: #333;
+  --chat-outgoing-text: #fff;
+  --input-bg: #fff;
+  --input-border: #ccc;
+  --shadow: rgba(0,0,0,0.1);
+  --error-bg: #f8d7da;
+  --error-text: #721c24;
+  --error-border: #f5c6cb;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #e0e0e0;
+  --text-secondary: #999;
+  --border-color: #404040;
+  --button-bg: #0088cc;
+  --button-text: #fff;
+  --chat-incoming-bg: #3a3a3a;
+  --chat-outgoing-bg: #0088cc;
+  --chat-outgoing-text: #fff;
+  --input-bg: #3a3a3a;
+  --input-border: #555;
+  --shadow: rgba(0,0,0,0.5);
+  --error-bg: #5a1f1f;
+  --error-text: #ffcccc;
+  --error-border: #8b3a3a;
+}
+
+/* Apply theme colors */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.wrapper {
+  background: var(--bg-secondary);
+  box-shadow: 0 0 128px 0 var(--shadow),
+              0 32px 64px -48px var(--shadow);
+}
+
+.form header,
+.users header,
+.chat-area header {
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.form form .error-text {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+}
+
+.form form .input input,
+.chat-area form input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
+}
+
+.form form .button input,
+.users header .logout {
+  background: var(--button-bg);
+  color: var(--button-text);
+}
+
+.users-list a,
+.search {
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.users-list a:hover {
+  background: var(--chat-incoming-bg);
+}
+
+.chat.incoming .details {
+  background: var(--chat-incoming-bg);
+  color: var(--text-primary);
+}
+
+.chat.outgoing .details {
+  background: var(--chat-outgoing-bg);
+  color: var(--chat-outgoing-text);
+}
+
+.chat-box {
+  background: var(--bg-secondary);
+}
+
+.search input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
+}
+
+/* Theme toggle button */
+.theme-toggle-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.theme-toggle-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: var(--button-bg);
+  color: var(--button-text);
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px var(--shadow);
+  transition: transform 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: scale(1.1);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+/* Toggle Switch */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.theme-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .theme-slider {
+  background-color: #0088cc;
+}
+
+input:checked + .theme-slider:before {
+  transform: translateX(26px);
+}
+
+/* Smooth transitions for theme change */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

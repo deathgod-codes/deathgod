@@ -410,3 +410,31 @@ body{
     width: 45px;
   }
 }
+
+/* Message Timestamps */
+.chat .details .timestamp {
+  font-size: 11px;
+  color: #999;
+  display: block;
+  margin-top: 3px;
+}
+
+.chat.outgoing .details .timestamp {
+  text-align: right;
+}
+
+.chat.incoming .details .timestamp {
+  text-align: left;
+}
+
+.chat .details .edited {
+  font-size: 11px;
+  color: #999;
+  font-style: italic;
+}
+
+/* Enhanced chat bubble styles */
+.chat .details p {
+  word-wrap: break-word;
+  line-height: 1.4;
+}

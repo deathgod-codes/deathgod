@@ -26,17 +26,43 @@
         
         if($result->num_rows > 0){
             while($row = $result->fetch_assoc()){
+                // Format timestamp
+                $timestamp = '';
+                if(isset($row['created_at']) && $row['created_at']) {
+                    $time = strtotime($row['created_at']);
+                    $now = time();
+                    $diff = $now - $time;
+                    
+                    if($diff < 60) {
+                        $timestamp = 'Just now';
+                    } elseif($diff < 3600) {
+                        $mins = floor($diff / 60);
+                        $timestamp = $mins . ' min' . ($mins > 1 ? 's' : '') . ' ago';
+                    } elseif($diff < 86400) {
+                        $hours = floor($diff / 3600);
+                        $timestamp = $hours . ' hour' . ($hours > 1 ? 's' : '') . ' ago';
+                    } elseif($diff < 172800) {
+                        $timestamp = 'Yesterday at ' . date('g:i A', $time);
+                    } else {
+                        $timestamp = date('M d, Y g:i A', $time);
+                    }
+                }
+                
+                $edited_indicator = (isset($row['is_edited']) && $row['is_edited']) ? ' <span class="edited">(edited)</span>' : '';
+                
                 if($row['outgoing_msg_id'] === $outgoing_id){
                     $output .= '<div class="chat outgoing">
                                 <div class="details">
-                                    <p>'. $security->sanitizeOutput($row['msg']) .'</p>
+                                    <p>'. $security->sanitizeOutput($row['msg']) . $edited_indicator .'</p>
+                                    <span class="timestamp">'. $timestamp .'</span>
                                 </div>
                                 </div>';
                 }else{
                     $output .= '<div class="chat incoming">
                                 <img src="php/images/'.$security->sanitizeOutput($row['img']).'" alt="">
                                 <div class="details">
-                                    <p>'. $security->sanitizeOutput($row['msg']) .'</p>
+                                    <p>'. $security->sanitizeOutput($row['msg']) . $edited_indicator .'</p>
+                                    <span class="timestamp">'. $timestamp .'</span>
                                 </div>
                                 </div>';
                 }
