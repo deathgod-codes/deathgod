@@ -20,7 +20,7 @@ return [
     'connection_timeout' => 300, // seconds (5 minutes)
     
     // Security
-    'allowed_origins' => ['*'], // Set specific origins in production
+    'allowed_origins' => ['http://localhost', 'http://127.0.0.1'], // Update for production with actual domain
     
     // Logging
     'debug' => true,

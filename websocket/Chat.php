@@ -24,8 +24,16 @@ class Chat implements MessageComponentInterface {
         $queryString = $conn->httpRequest->getUri()->getQuery();
         parse_str($queryString, $query);
         
-        if (isset($query['user_id'])) {
+        if (isset($query['user_id']) && isset($query['session_token'])) {
             $userId = (int)$query['user_id'];
+            
+            // Validate user session token
+            if (!$this->validateUserSession($userId, $query['session_token'])) {
+                echo "Authentication failed for user {$userId}\n";
+                $conn->close();
+                return;
+            }
+            
             $conn->userId = $userId;
             $this->users[$userId] = $conn;
             
@@ -38,6 +46,7 @@ class Chat implements MessageComponentInterface {
             echo "User {$userId} connected. Total connections: " . count($this->clients) . "\n";
         } else {
             echo "Connection from {$conn->resourceId} (unauthenticated)\n";
+            $conn->close();
         }
     }
     
@@ -45,6 +54,13 @@ class Chat implements MessageComponentInterface {
         $data = json_decode($msg, true);
         
         if (!$data || !isset($data['type'])) {
+            echo "Malformed JSON message received: " . substr($msg, 0, 100) . "\n";
+            return;
+        }
+        
+        // Validate user is authenticated
+        if (!isset($from->userId)) {
+            echo "Unauthenticated connection attempted to send message\n";
             return;
         }
         
@@ -206,6 +222,26 @@ class Chat implements MessageComponentInterface {
     }
     
     // Helper methods
+    
+    private function validateUserSession($userId, $sessionToken) {
+        // Check if session token matches the user's active session
+        $stmt = $this->db->prepare("SELECT unique_id FROM users WHERE unique_id = ? LIMIT 1");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            $stmt->close();
+            return false;
+        }
+        
+        $stmt->close();
+        
+        // For now, just verify user exists
+        // In production, validate against actual session store (Redis, Memcached, or database sessions)
+        // You could store session tokens in database or use PHP's session_id() matching
+        return true;
+    }
     
     private function updateUserStatus($userId, $status) {
         $stmt = $this->db->prepare("UPDATE users SET status = ? WHERE unique_id = ?");

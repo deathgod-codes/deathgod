@@ -103,5 +103,5 @@ CREATE TABLE IF NOT EXISTS `push_subscriptions` (
   INDEX `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Commit changes
-COMMIT;
+-- End of migration
+-- Note: Run these commands manually, not as a transaction since they are DDL statements

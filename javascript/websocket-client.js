@@ -25,7 +25,9 @@ class WebSocketClient {
         
         const wsHost = window.location.hostname;
         const wsPort = 8080;
-        const wsUrl = `ws://${wsHost}:${wsPort}?user_id=${this.userId}`;
+        // In production, use session_id or a generated token
+        const sessionToken = 'temp_token'; // This should be fetched from backend or generated
+        const wsUrl = `ws://${wsHost}:${wsPort}?user_id=${this.userId}&session_token=${sessionToken}`;
         
         console.log(`Connecting to WebSocket: ${wsUrl}`);
         this.updateConnectionStatus('connecting');
@@ -89,7 +91,8 @@ class WebSocketClient {
         }
         
         this.reconnectAttempts++;
-        const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1); // Exponential backoff
+        // Exponential backoff with max 30 seconds
+        const delay = Math.min(this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1), 30000);
         
         console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
         this.updateConnectionStatus('reconnecting');

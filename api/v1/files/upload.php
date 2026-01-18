@@ -98,8 +98,18 @@ $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
 $originalName = pathinfo($file['name'], PATHINFO_FILENAME);
 $uniqueName = time() . '_' . md5($originalName . uniqid()) . '.' . $extension;
 
+// Ensure upload directory exists
+$uploadDir = $config['upload_dirs'][$fileCategory];
+if (!is_dir($uploadDir)) {
+    if (!mkdir($uploadDir, 0755, true)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to create upload directory']);
+        exit;
+    }
+}
+
 // Move uploaded file
-$uploadPath = $config['upload_dirs'][$fileCategory] . $uniqueName;
+$uploadPath = $uploadDir . $uniqueName;
 if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
     http_response_code(500);
     echo json_encode(['error' => 'Failed to save file']);
